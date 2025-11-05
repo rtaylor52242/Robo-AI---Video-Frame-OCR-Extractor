@@ -1,0 +1,5 @@
+{
+  "name": "Robo AI - Video Frame OCR Extractor",
+  "description": "Upload a video, select a time range, and use Gemini to perform OCR on the extracted frames. The app then displays all unique words found in the video selection.",
+  "requestFramePermissions": []
+}
