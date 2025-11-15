@@ -36,6 +36,12 @@ const TrashIcon = () => (
     </svg>
 );
 
+const QuestionMarkCircleIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+);
+
 
 // --- UI Components ---
 const FileUploader: React.FC<{ onFileChange: (file: File) => void; disabled: boolean }> = ({ onFileChange, disabled }) => (
@@ -66,6 +72,44 @@ const RangeSlider: React.FC<{
     />
 );
 
+const HelpModal: React.FC<{ onClose: () => void }> = ({ onClose }) => (
+    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onClick={onClose}>
+        <div className="bg-gray-800 rounded-lg shadow-2xl max-w-2xl w-full p-6 sm:p-8 relative" onClick={(e) => e.stopPropagation()}>
+            <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors" aria-label="Close help">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <h2 className="text-3xl font-bold text-indigo-400 mb-6">How to Use This App</h2>
+            <ol className="list-decimal list-inside space-y-4 text-gray-300">
+                <li>
+                    <strong>Upload Video:</strong> Click the upload area to select a video file from your computer. The app works best with clear, stable footage.
+                </li>
+                <li>
+                    <strong>Select Time Range:</strong> Once the video loads, use the two sliders to define the start and end points of the section you want to analyze. The app will extract one frame per second from this selection.
+                </li>
+                <li>
+                    <strong>Analyze:</strong> Click the <span className="font-semibold text-white bg-indigo-600 px-2 py-0.5 rounded-md">Analyze Video Selection</span> button to start the process. This can take some time depending on the length of your selection.
+                </li>
+                <li>
+                    <strong>Review Results:</strong> The extracted frames will appear in the "Extracted Frames" box. Unique words found via OCR will show up in the "Unique Words" list. You can click any frame to view it larger.
+                </li>
+                <li>
+                    <strong>Refine Results:</strong>
+                    <ul className="list-disc list-inside ml-5 mt-2 space-y-1">
+                        <li>Use the "Exclusion List" to add common words you want to ignore.</li>
+                        <li>You can also <strong className="text-indigo-300">double-click</strong> a word in the "Unique Words" list to quickly add it to the exclusion list and remove it from the results.</li>
+                    </ul>
+                </li>
+                <li>
+                    <strong>Download:</strong> When you're happy with the results, click the <span className="font-semibold text-white bg-green-600 px-2 py-0.5 rounded-md">Download CSV</span> button to save the list of unique words.
+                </li>
+            </ol>
+        </div>
+    </div>
+);
+
+
 // --- Constants ---
 const LOCAL_STORAGE_KEY = 'robo-ai-video-ocr-extractor-excluded-words';
 const INITIAL_EXCLUDED_WORDS = [
@@ -87,6 +131,7 @@ export default function App() {
     const [uniqueWords, setUniqueWords] = useState<string[]>([]);
     const [selectedFrameUrl, setSelectedFrameUrl] = useState<string | null>(null);
     const [newExcludedWord, setNewExcludedWord] = useState('');
+    const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
 
     const [excludedWords, setExcludedWords] = useState<string[]>(() => {
         try {
@@ -250,9 +295,14 @@ export default function App() {
         <div className="min-h-screen bg-gray-900 text-gray-200 p-4 sm:p-6 lg:p-8">
             <div className="max-w-7xl mx-auto">
                 <header className="text-center mb-8">
-                    <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-600">
-                        Robo AI - Video Frame OCR Extractor
-                    </h1>
+                    <div className="flex justify-center items-center gap-4">
+                        <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-600">
+                            Robo AI - Video Frame OCR Extractor
+                        </h1>
+                        <button onClick={() => setIsHelpModalOpen(true)} className="text-gray-400 hover:text-indigo-400 transition-colors" aria-label="Help">
+                            <QuestionMarkCircleIcon />
+                        </button>
+                    </div>
                     <p className="mt-2 text-lg text-gray-400">Upload a video, select a time range, and let AI find the words.</p>
                 </header>
 
@@ -369,6 +419,9 @@ export default function App() {
                     <img src={selectedFrameUrl} alt="Selected Frame" className="max-w-full max-h-full object-contain rounded-lg shadow-2xl" onClick={(e) => e.stopPropagation()} />
                 </div>
             )}
+
+            {/* Modal for help */}
+            {isHelpModalOpen && <HelpModal onClose={() => setIsHelpModalOpen(false)} />}
         </div>
     );
 }
